@@ -1,0 +1,15 @@
+10, 20
+20,20
+
+10,20
+50,20
+- 8 Puzzle Problem solved in (hours:min:sec:milliseconds) (Method 2): 00:01:12.32
+
+
+Enter start node's (x,y) coordinates seperated by comma. Ex: 1,2 10,20
+Start node x-coordinate: 10
+Start node y-coordinate: 20
+
+Enter goal node's (x,y) coordinates seperated by comma. Ex: 1,2 200,25
+Goal node x-coordinate: 200
+Goal node y-coordinate: 25
