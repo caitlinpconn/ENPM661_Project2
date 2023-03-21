@@ -3,6 +3,7 @@
 
 # In[1]:
 
+
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -174,14 +175,16 @@ def create_map_grid():
                 map_grid[y,x] = obstacle_color
                 
 
-            # Display hexagon
+            # Something???
             if ( ((l1b*y)+(l1a*x)-l1c) >= 0  and ((l2b*y)+(l2a*x)-l2c) >= 0) and ((l3b*y)+(l3a*x)-l3c) >= 0 and ((l4b*y)+(l4a*x)-l4c) >= 0 and ((l5b*y)+(l5a*x)-l5c) >= 0 and ((l6b*y)+(l6a*x)-l6c) >= 0:
                 map_grid[y,x] = clearance_color
 
             if ( ((l1b_i*y)+(l1a_i*x)-l1c_i) >= 0  and ((l2b_i*y)+(l2a_i*x)-l2c_i) >= 0) and ((l3b_i*y)+(l3a_i*x)-l3c_i) >= 0 and ((l4b_i*y)+(l4a_i*x)-l4c_i) >= 0 and ((l5b_i*y)+(l5a_i*x)-l5c_i) >= 0 and ((l6b_i*y)+(l6a_i*x)-l6c_i) >= 0:
                 map_grid[y,x] = obstacle_color
 
+            #############################################################
             # Display triangle 
+
             if ( ((t1b*y)+(t1a*x)-(t1c-triangle_factor)) >= 0  and ((t2b*y)+(t2a*x)-(t2c+triangle_factor)) <= 0 and ((t3b*y)+(t3a*x)-(t3c-triangle_factor)) >= 0):
                 map_grid[y,x] = clearance_color
 
@@ -208,6 +211,7 @@ def create_map_grid():
 def check_node_in_obstacle_space(child_node_x, child_node_y, obstacle_matrix):
     
     return obstacle_matrix[child_node_y][child_node_x] == -1
+
 
 ###############################################################################
 # Function also determines the validity of the swap/action
@@ -379,6 +383,7 @@ def update_child_parent(open_queue, node_idx, curr_parent_idx):
     open_dict = {node[1]: {'parent_idx': node[2]} for node in open_queue}
     if node_idx in open_dict:
         open_dict[node_idx]['parent_idx'] = curr_parent_idx
+        
         open_queue[node_idx][2]  = open_dict[node_idx]['parent_idx']
     
     return
@@ -410,7 +415,6 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
     # Process next node in queue
     # When all children are checked, remove next top node from data structure
     while (len(open_queue) != 0): # Stop search when node queue is empty 
-        
         curr_node = hq.heappop(open_queue)
         # print("Node Popped from of Num Queue, Curr Length: ", len(open_queue))
         # print()
@@ -466,11 +470,11 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
                 
             if valid_move == 1:
                 # print("Valid Move Boolean -> True")
-#                print("Child Node X-Coord: ", child_node_x_valid)
-#                print("Child Node Y-Coord: ", child_node_y_valid)
+                print("Child Node X-Coord: ", child_node_x_valid)
+                print("Child Node Y-Coord: ", child_node_y_valid)
                 
                 is_equal = (child_node_x_valid == goal_node_coord[0] and child_node_y_valid == goal_node_coord[1]) # check if goal node reached
-                #print()
+                print()
                 # print("- - - - - - - - - - - - - - - - - - ")
                 # print()
                 # print("Equal to Goal State ? : ", is_equal)
@@ -478,14 +482,8 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
                 
                 if (is_equal == True): 
                     node_idx = node_idx + 1 
-                        
-                    parent_c2c_val_stored = get_c2c_value(c2c_matrix, map_grid, map_height, map_width, curr_node[3][0], curr_node[3][1])
-                    if parent_c2c_val_stored == np.inf:
-                        parent_c2c_val_stored = 0
-                        
-                    child_c2c_val_updated =  parent_c2c_val_stored + cost_to_move
-    
-                    child_node = (child_c2c_val_updated, node_idx, curr_parent_idx,(child_node_x_valid, child_node_y_valid))
+                    child_c2c_val = get_c2c_value(c2c_matrix, map_grid, map_height, map_width, child_node_x_valid, child_node_y_valid)
+                    child_node = (child_c2c_val, node_idx, curr_parent_idx,(child_node_x_valid, child_node_y_valid))
                     
                     visited_queue.append(child_node)
                     map_grid[child_node[3][0], child_node[3][1]] = (0,255,255)
@@ -550,12 +548,7 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
 
                             
                     parent_c2c_val_stored = get_c2c_value(c2c_matrix, map_grid, map_height, map_width, curr_node[3][0], curr_node[3][1])
-                    if parent_c2c_val_stored == np.inf:
-                        parent_c2c_val_stored = 0
-                        
                     child_c2c_val_stored = get_c2c_value(c2c_matrix, map_grid, map_height, map_width, child_node_x_valid, child_node_y_valid)
-                    if child_c2c_val_stored == np.inf:
-                        child_c2c_val_stored = 0
                     #manhat_dist = compute_manhat_dist_between_nodes(child_node_x_valid, child_node_y_valid, curr_node[3][0], curr_node[3][1])
    
                     #if (explored == True):
@@ -581,8 +574,8 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
                                 c2c_matrix[child_node_y_valid][child_node_x_valid] = child_c2c_val_updated
                                 update_child_parent(open_queue, node_idx, curr_parent_idx)
                         
-#            else:
-#                print("Valid Move Boolean -> False")
+            else:
+                print("Valid Move Boolean -> False")
                             
 
             ##################################################################################
@@ -632,7 +625,6 @@ def main():
     plt.imshow(map_grid.astype(np.uint8), origin="lower")
     plt.show()
 
-
     x_initial, y_initial = eval(input("Enter start node's (x,y) coordinates seperated by comma. Ex: 1,2 "))
     print("Start node x-coordinate:", x_initial)
     print("Start node y-coordinate:",y_initial)
@@ -672,9 +664,13 @@ def main():
     
     print("Was goal found ? : ", goal_found)
         
+
+    
     #################################################################################################
     # FUNCTION TO GENERATE NODE PATHWAY FROM INITIAL TO GOAL NODE
 #     backtrack_node_path_arry = generate_path(node_info, goal_node_idx)
+    
+
     
     #################################################################################################
     
@@ -698,18 +694,18 @@ def main():
     print()
     #################################################################################################
     
-#    generate_path(visited_queue)
+    generate_path(visited_queue)
     #################################################################################################
     
     plt.figure()
     plt.title('Final')
     plt.imshow(map_grid.astype(np.uint8), origin="lower")
     plt.show()
-#    
-#    print("Working on saving animation")
-#    ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
-#    ani.save("movie.mp4")
-#    print("Animation done")
+    
+    print("Working on saving animation")
+    ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
+    ani.save("movie.mp4")
+    print("Animation done")
 
     #ani.save("movie.mp4")
     # writer = animation.FFMpegWriter(fps=1, metadata=dict(artist='Me'), bitrate=1800)
@@ -725,3 +721,9 @@ main()
 
 # END OF SOURCE CODE FILE
 #########################################################################################################################################
+
+
+# # 
+
+
+# #### 
