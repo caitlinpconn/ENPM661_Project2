@@ -4,3 +4,17 @@
 10,11
 130,110
 
+10,11
+15,20
+
+
+  File "C:\Users\caitlin.p.conn\OneDrive - US Army\Documents\PersonalNetworkStorage\UMD\ENPM661\ENPM662_Project2\Proj2_Code_CurrentVersion_Test_Node_Idx.py", line 698, in dijkstra_approach_alg
+    update_child_parent(open_queue, node_idx, curr_parent_idx)
+
+  File "C:\Users\caitlin.p.conn\OneDrive - US Army\Documents\PersonalNetworkStorage\UMD\ENPM661\ENPM662_Project2\Proj2_Code_CurrentVersion_Test_Node_Idx.py", line 372, in update_child_parent
+    open_queue[node_idx][2]  = open_dict[node_idx]['parent_idx']
+
+IndexError: list index out of range
+
+10,11
+20,30

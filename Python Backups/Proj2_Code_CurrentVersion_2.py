@@ -7,11 +7,10 @@ Created on Tue Mar 21 16:05:08 2023
 """
 
 import matplotlib.animation as animation
-from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt 
 import numpy as np 
-import math
 import cProfile
+import math
 import cv2 
 
 # Required imported libraries
@@ -48,14 +47,13 @@ def create_map_grid():
     # Define obstacle and wall color
     obstacle_color = (255,0,0) #RED
     # Define obstacle clearance color
-    clearance_color = (102, 0, 0) #(0,255,0) #GREEN
-    
-    # Clearance mm_to_pixels_factor mm_to_pixels_factor 
-    
+    clearance_color = (102, 0, 0) #DARK RED #(0,255,0) #GREEN
+            
     triangle_factor = 1000
     c = 5 #5 pixels
     
     #############################################################
+    
     # Display hexagon
 
     hexagon_x_center = 300 #100+50+150
@@ -124,6 +122,8 @@ def create_map_grid():
     l5a_i, l5b_i, l5c_i = compute_line_abc(pt5_i, pt6_i)
     l6a_i, l6b_i, l6c_i = compute_line_abc(pt6_i, pt1_i)
     
+    #############################################################
+    
     tri_low_pt = [460,25]
     tri_up_pt = [460,225]
     tri_right_pt = [510,125]
@@ -139,6 +139,8 @@ def create_map_grid():
     t1a, t1b, t1c = compute_line_abc(tri_low_pt, tri_up_pt)
     t2a, t2b, t2c = compute_line_abc(tri_low_pt, tri_right_pt)
     t3a, t3b, t3c = compute_line_abc(tri_up_pt, tri_right_pt)
+    
+    #############################################################
     
     # Set wall color 
     #cv2.rectangle(map_grid, (1,250), (600,1), obstacle_color, 5)
@@ -148,9 +150,20 @@ def create_map_grid():
             # Plot walls
             # map_height = 250
             # map_width = 600
+            
+            # Plot horizontal walls clearance
+            if (x >= 0 and x < map_width and y >= 5 and y<10) or (x >= 0 and x < map_width and y >= 240  and y < 245):
+                map_grid[y,x] = clearance_color
+            
+            # Plot horizontal walls
             if (x >= 0 and x < map_width and y >= 0 and y<5) or (x >= 0 and x < map_width and y >= 245  and y<map_height):
                 map_grid[y,x] = obstacle_color
-                
+             
+            # Plot vertical walls clearance
+            if (x >= 5 and x < 10 and y >= 0 and y<map_height) or (x >= 590 and x < 595 and y >= 0 and y<map_height):
+                map_grid[y,x] = clearance_color
+            
+            # Plot vertical walls 
             if (x >= 0 and x < 5 and y >= 0 and y<map_height) or (x >= 595 and x < map_width and y >= 0 and y<map_height):
                 map_grid[y,x] = obstacle_color
 
@@ -186,24 +199,14 @@ def create_map_grid():
 
             if ( ((t1b*y)+(t1a*x)-t1c) >= 0  and ((t2b*y)+(t2a*x)-t2c) <= 0 and ((t3b*y)+(t3a*x)-t3c) >= 0):
                 map_grid[y,x] = obstacle_color
-                
-                
-#     plt.figure()
-#     #map_grid[125:150,200:300] = (0,255,255)
-#     plt.imshow(map_grid.astype(np.uint8), origin="lower")
-#     plt.show()
-    
-#     plt.figure()
-#     plt.imshow(map_grid[0:6,0:6], origin="lower")
     
     return map_grid, map_height, map_width 
-
-
 
 
 # DIJKSTRA's ALGORITHM APPROACH FOR FORWARD SEARCH POINT ROBOT PROBLEM
 
 ###############################################################################
+
 def check_node_in_obstacle_space(child_node_x, child_node_y, obstacle_matrix):
     
     return obstacle_matrix[child_node_y][child_node_x] == -1
@@ -282,134 +285,58 @@ def generate_child_node(obstacle_matrix, c2c_matrix, parent_node, action, map_gr
     return cost_to_move, valid_move, child_node_x, child_node_y, is_node_obstacle
 
 #################################################################################################
-# # Function uses backtracking to find the node pathway from the initial node to goal node
-# def generate_path(node_info, goal_node_idx):
-    
-#     backtrack_arry = []
-#     curr_node_idx = goal_node_idx # this value will change throughout function
-#     counter = goal_node_idx
-    
-#     while counter != 1: # when counter == 1, initial node is reached
-#         for k in range(len(node_info)):
-#             if node_info[k][0] == curr_node_idx: # compare indices
-#                 backtrack_arry.append(node_info[k][2]) # append node to array
-#                 curr_node_idx = node_info[k][1] # update parent index, next node to search for
-#                 counter = curr_node_idx
-                
-#                 if counter == 1: # when counter == 1, initial node is reached
-#                     backtrack_arry.append(node_info[0][2])
-    
-#     backtrack_arry = np.array(backtrack_arry)   
-    
-#     # Source: https://numpy.org/doc/stable/reference/generated/numpy.fliplr.html
-#     # Must use flipud function to ensure using a forward search strategy!!
-#     backtrack_node_path_arry = np.flipud(backtrack_arry)
-    
-#     return backtrack_node_path_arry
 
 # Function uses backtracking to find the node pathway from the initial node to goal node
-def generate_path(visited_queue):
-    
-    #print(visited_queue)
+# Source: https://numpy.org/doc/stable/reference/generated/numpy.fliplr.html
+# Must use flipud function to ensure using a forward search strategy!!
+def generate_path(visited_queue, initial_node_coord):
+            
+    backtrack_path_list = []
+    path_list = []
         
-    # Source: https://numpy.org/doc/stable/reference/generated/numpy.fliplr.html
-    # Must use flipud function to ensure using a forward search strategy!!
-    backtrack_node_path_arry = np.flipud(visited_queue)
+    first_parent_coord = visited_queue[len(visited_queue)-1][2]
+    curr_elem_x = visited_queue[len(visited_queue)-1][3][0]
+    curr_elem_y = visited_queue[len(visited_queue)-1][3][1]
     
-    traversal_list = []
-    e = len(visited_queue) - 1
-    parent_idx = visited_queue[e][2]
-    cnt = 0
-    while cnt != len(visited_queue):
-        for cnt2 in range(len(visited_queue)):
-            if visited_queue[cnt2][1] == parent_idx:
-                traversal_list.append(visited_queue[cnt2][3])
-                parent_idx = visited_queue[cnt2][2]
+    path_list.append(visited_queue[len(visited_queue)-1])
+    parent_coord = first_parent_coord
+    
+    while(not((curr_elem_x == initial_node_coord[0]) and (curr_elem_y == initial_node_coord[1]))):
+        for visited_elem in visited_queue:
+            curr_elem_x = visited_elem[3][0]
+            curr_elem_y = visited_elem[3][1]
+            if visited_elem[1] == parent_coord:
+                parent_coord = visited_elem[2]
+                path_list.append(visited_elem)
                 break
-        cnt = cnt + 1
-        
-    #print(len(visited_queue))
-    #print(len(traversal_list))
     
-    return traversal_list
+    # for elem in visited_queue:
+    #     print("Visited Queue Current Element: ", elem)
+    # print()
+
+    # for p in path_list:
+    #     print("Path List Current Element: ", p)
+    # print()
+    
+    backtrack_path_list = np.flipud(path_list)
+
+    return backtrack_path_list
 
 #################################################################################################
 
-def initialize_c2c_matrix(map_grid, map_height, map_width):
-#    c2c_matrix = np.zeros((map_height, map_width))
-#    for y in range(map_height):
-#        for x in range(map_width):
-#            if y == 0 and x == 0:
-#                c2c_matrix[y,x] = 0
-#            elif np.mean(map_grid[y,x]) == 1: # free space
-#                c2c_matrix[y,x] = float('inf')
-#            else: # obstacle/wall space
-#                c2c_matrix[y,x] = -1
-
-    #################################################################################
-    # test_matrix = map_grid.copy()
-    # for y in range(map_height):
-    #     for x in range(map_width):
-    #         if y == 0 and x == 0:
-    #             test_matrix[y,x] = (255,255,255) # white
-    #         elif np.mean(map_grid[y,x]) == 1: # free space
-    #             test_matrix[y,x] = (0,0,0) # black
-    #         else: # obstacle/wall space
-    #             test_matrix[y,x] = (0,255,255) # aqua
-    # plt.figure()
-    # plt.imshow(test_matrix.astype(np.uint8), origin="lower")
-    # plt.show()
-    
-    # for y in range(200):
-    #     for x in range(200):
-    #         print(np.mean(map_grid[y,x]))
-    #         if  np.mean(map_grid[y,x]) != 1: #test_matrix[y,x].all() == (0,255,255):
-    #             test_matrix[y,x] = (255,255,0)
-
-    # plt.figure()
-    # plt.imshow(test_matrix.astype(np.uint8), origin="lower")
-    # plt.show()
-    
-    #################################################################################
-
-    # plt.figure()
-    # plt.imshow(test_matrix.astype(np.uint8), origin="lower")
-    # plt.show()
-       
-    # import pandas as pd
-    # print(np.shape(map_grid))
-    # print(pd.DataFrame(map_grid))       
+def initialize_c2c_matrix(map_grid, map_height, map_width):  
     
     # Create boolean arrays to represent the various regions of the map
     free_space = np.mean(map_grid, axis=-1) == 1
     obstacle_space = np.logical_not(free_space)
-    
-    # test_matrix = map_grid.copy()
-    # test_matrix[obstacle_space] = (0,255,255)
-    # test_matrix[free_space] = (255,255,0)
-    # plt.figure()
-    # plt.imshow(test_matrix.astype(np.uint8), origin="lower")
-    # plt.show()
     
     # Create c2c_matrix using the boolean arrays
     c2c_matrix = np.zeros((map_height, map_width))
     c2c_matrix[free_space] = np.inf
     c2c_matrix[obstacle_space] = round(-1,1)
 
-    
     # Set the starting point to 0
     c2c_matrix[0, 0] = round(0,1)
-    
-    # test_matrix = map_grid.copy()
-    # for y in range(map_height):
-    #     for x in range(map_width):
-    #         if c2c_matrix[y][x]== np.inf: # free space
-    #             test_matrix[y,x] = (255,255,255) # white
-    #         elif c2c_matrix[y][x] == -1: # obst space
-    #             test_matrix[y,x] = (0,0,0) # black
-    # plt.figure()
-    # plt.imshow(test_matrix.astype(np.uint8), origin="lower")
-    # plt.show()
 
     return c2c_matrix  
 
@@ -419,33 +346,64 @@ def get_c2c_value(c2c_matrix, map_grid, map_height, map_width, child_x, child_y)
     
     return c2c_value
 
-def update_child_parent(open_queue, node_idx, curr_parent_idx):
-    
-#    for c in range(len(open_queue)):
-#        if open_queue[c][1] == node_idx:
-#            open_queue[c][2] = curr_parent_idx
-#            break
-        
-#    c = 0  
-#    open_queue[c][2] = [curr_parent_idx for c in range (len(open_queue)) if open_queue[c][1] == node_idx]
+#################################################################################################
 
+def update_child_parent(open_queue, node_idx, curr_parent_idx, child_c2c_val_updated):
+    
+    for c in range(len(open_queue)):
+        if open_queue[c][1] == node_idx:
+            # print( open_queue[c])
+            # print(type( open_queue[c][2]))
+            # print(type())
+            tmp_list = list(open_queue[c])
+            # print("tmp_list: ", tmp_list)
+            tmp_list[2] = curr_parent_idx
+            tmp_list[0] = child_c2c_val_updated
+            # print("tmp_list: ", tmp_list)
+            tmp_tuple = tuple(tmp_list)
+            # print("tmp_tuple: ", tmp_tuple)
+            
+            open_queue[c] = tmp_tuple
+
+            #open_queue[c][2] = curr_parent_idx
+            break
+        
+    # c = 0  
+    # open_queue[c][2] = [curr_parent_idx for c in range (len(open_queue)) if open_queue[c][1] == node_idx]
    
-    open_dict = {node[1]: {'parent_idx': node[2]} for node in open_queue}
-    if node_idx in open_dict:
-        open_dict[node_idx]['parent_idx'] = curr_parent_idx
-        open_queue[node_idx][2]  = open_dict[node_idx]['parent_idx']
+    # open_dict = {node[1]: {'parent_idx': node[2]} for node in open_queue}
+    # if node_idx in open_dict:
+    #     # open_dict[node_idx]['parent_idx'] = curr_parent_idx
+    #     print(len(open_queue))
+    #     print(node_idx)
+    #     t = open_queue[node_idx]
+    #     tmp_list = list(open_queue[node_idx])
+    #     tmp_list[2] = curr_parent_idx
+    #     tmp_list[0] = child_c2c_val_updated
+    #     tmp_tuple = tuple(tmp_list)
+    #     open_queue[node_idx] = tmp_tuple
+    #     #open_queue[node_idx][2]  = open_dict[node_idx]['parent_idx']
+    
+    # print("Node updated")
+    # print()
     
     return
 
-def display_map_grid_plot(map_grid, x, y, point_thickness):
-    
-    map_grid = cv2.circle(map_grid, (x, y), radius=0, color=(0, 0, 255), thickness=point_thickness)
+#################################################################################################
 
-    
+def display_map_grid_plot(map_grid, x, y, point_thickness, goal_found, goal_x, goal_y, curr_x, curr_y):
+    found_goal_bool = (curr_x == goal_x and curr_y == goal_y)
+    if found_goal_bool == True:
+        map_grid = cv2.circle(map_grid, (x, y), radius=0, color=(0, 0, 255), thickness=point_thickness)
+
     plt.figure()
     plt.title('Node Explored')
     plt.imshow(map_grid.astype(np.uint8), origin="lower")
     plt.show()
+    
+    return
+
+#################################################################################################
 
 def print_function(i, valid_move, is_node_obstacle, case_type, plot_fig, map_grid):
     if i == 1:
@@ -469,11 +427,12 @@ def print_function(i, valid_move, is_node_obstacle, case_type, plot_fig, map_gri
     
     print("is_node_obstacle: ", is_node_obstacle)
 
-    
     if case_type == 1:
         print("Node will be colored blue")
     elif case_type ==  2:
         print("Node in open, but not explored, will be colored blue")
+    
+    print()
         
     if plot_fig == True:
         plt.figure()
@@ -481,39 +440,60 @@ def print_function(i, valid_move, is_node_obstacle, case_type, plot_fig, map_gri
         plt.imshow(map_grid.astype(np.uint8), origin="lower")
         plt.show()
         
-    
-
+    return
+        
 #################################################################################################
                 
 # Main function that calls subfunctions that perform search operations
 def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_node_coord, map_grid, map_height, map_width):
+    
+    ##############################################################################
+    
     fig, ax = plt.subplots()
-    # cntr = 1 # Counter
-    node_idx = 1 # Node index 
+    
+    point_thickness = 5 # Thickness of initial and goal node circle pointer
     curr_parent_idx = 0 # Parent index
     debug_counter = 0
+    node_idx = 1 # WAS 1 # Node index 
     
     ims = []
+
+    # Create empty queues
+    visited_queue = [] # explored, valid nodes
+    open_queue = [] # keeps track of node queue to be processed
     
-    point_thickness = 5
+    show_grid = True
+    goal_found = False # When true, stop searching 
     
+    ##############################################################################
+    
+    # height = map_height # height of image shape 
+    # width = map_width   # width of image shape 
+    # size = (width, height) # size = (height, width) 
+    
+    
+    # Define the codec and create VideoWriter object
+    # out = cv2.VideoWriter('new_video.avi', cv2.VideoWriter_fourcc(*'DIVX'), 2, size) 
+    # out = cv2.VideoWriter('new_video2.avi', cv2.VideoWriter_fourcc(*'MJPG'), 2, size) 
+    
+    ##############################################################################
+        
     initial_node = (0, node_idx, curr_parent_idx, initial_node_coord)
     
-    visited_queue = [] # explored, valid nodes
-    goal_found = False # When true, stop searching 
-
-    # Create empty queue
-    open_queue = [] # keeps track of node queue to be processed
     hq.heappush(open_queue, initial_node) 
     hq.heapify(open_queue)
+    
     # print("First node appended: \n", hq.heappop(open_queue))
     # print()
+    
+    ##############################################################################
             
     # Process next node in queue
     # When all children are checked, remove next top node from data structure
     while (len(open_queue) != 0): # Stop search when node queue is empty 
         
         curr_node = hq.heappop(open_queue)
+        
         # print("Node Popped from of Num Queue, Curr Length: ", len(open_queue))
         # print()
 
@@ -532,23 +512,20 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
         #     print(curr_node)
         #     print()
 
-        # Append first (initial) node to the node queue  
-        #if cntr == 1:
         visited_queue.append(curr_node) #(node_idx, curr_parent_idx, curr_node))
         map_grid[curr_node[3][1], curr_node[3][0]] = (0,255,255)
         map_grid = cv2.circle(map_grid, initial_node_coord, radius=0, color=(255, 0, 255), thickness=point_thickness)
-
+  
         ax.axis('off')
         im = ax.imshow((map_grid).astype(np.uint8), animated=True, origin="lower")
         ims.append([im])
-        #cntr = cntr + 1
+        
         
         # plt.figure()
         # plt.title('Node Explored')
         # plt.imshow(map_grid.astype(np.uint8), origin="lower")
         # plt.show()
-        show_grid = True
-
+        
         # parent_is_equal = (curr_node[3][0] == goal_node_coord[0] and curr_node[3][1] == goal_node_coord[1]) # check if goal node reached
 
         if show_grid == True and debug_counter % 5000 == 0:
@@ -558,88 +535,75 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
             print(curr_node)
             print()
             
-            display_map_grid_plot(map_grid, curr_node[3][0], curr_node[3][1], point_thickness)
+            # display_map_grid_plot(map_grid, curr_node[3][0], curr_node[3][1], point_thickness, goal_found, goal_node_coord[0], goal_node_coord[1],  curr_node[3][0],  curr_node[3][1])
     
-        
-        node_idx = node_idx + 1 
-        
         # Evaluate children
+        # node_idx = node_idx + 1 
         curr_parent_idx = curr_parent_idx + 1 
-        i = 1
         found = 0
+        i = 1
         
         while i < 9:
-            #print()
+            
             case_type = 0
 
             if found == 1:
                 break
                 
-            # if i == 1:
-            #     print("Action Left (-1,0)")
-            # elif i == 2:
-            #     print("Action Up (0,1)")
-            # elif i == 3:
-            #     print("Action Right (1,0)")
-            # elif i == 4:
-            #     print("Action Down (0,-1)")
-            # elif i == 5:
-            #     print("Action Right & Up (1,1)")
-            # elif i == 6:
-            #     print("Action Left & Up (-1,1)")
-            # elif i == 7:
-            #     print("Action Right & Down (1,-1)")
-            # elif i == 8:
-            #     print("Action Left & Down (-1,-1)")
-                
             cost_to_move, valid_move, child_node_x_valid, child_node_y_valid, is_node_obstacle = generate_child_node(obstacle_matrix, c2c_matrix, curr_node, i, map_grid, map_height, map_width)
                                     
-            ##################################################################################3
-            # print("Is Valid Move Boolean -> ? : ", valid_move)
-            #print()
-            
-            ##################################################################################
-            
             if valid_move == True:
+                
                 # print("Valid Move Boolean -> True")
-#                print("Child Node X-Coord: ", child_node_x_valid)
-#                print("Child Node Y-Coord: ", child_node_y_valid)
+                # print("Child Node X-Coord: ", child_node_x_valid)
+                # print("Child Node Y-Coord: ", child_node_y_valid)
                 
                 is_equal = (child_node_x_valid == goal_node_coord[0] and child_node_y_valid == goal_node_coord[1]) # check if goal node reached
-                #print()
+                # print()
                 # print("- - - - - - - - - - - - - - - - - - ")
                 # print()
                 # print("Equal to Goal State ? : ", is_equal)
                 # print()
                 
                 if (is_equal == True): 
+                    
+                    found = 1
+                    goal_found = True
+                    
                     node_idx = node_idx + 1 
                         
                     parent_c2c_val_stored = get_c2c_value(c2c_matrix, map_grid, map_height, map_width, curr_node[3][0], curr_node[3][1])
                     if parent_c2c_val_stored == np.inf:
                         parent_c2c_val_stored = 0
-                        
                     parent_c2c_val_stored = round(parent_c2c_val_stored,1)
                         
                     child_c2c_val_updated =  parent_c2c_val_stored + cost_to_move
-                    
                     child_c2c_val_updated = round(child_c2c_val_updated,1)
     
                     child_node = (child_c2c_val_updated, node_idx, curr_parent_idx,(child_node_x_valid, child_node_y_valid))
-                    
                     visited_queue.append(child_node)
                     
                     #map_grid[child_node[3][1], child_node[3][0]] = (0,255,255)
                     map_grid = cv2.circle(map_grid, (child_node[3][0], child_node[3][1]), radius=0, color=(0, 0, 255), thickness=point_thickness)
+                    
+                    backtrack_path_list = generate_path(visited_queue, initial_node_coord)
+                    
+                    # for path_elem in backtrack_path_list:
+                    #     map_grid[path_elem[3][1], path_elem[3][0]] = (255,0,0)
+                       
+                    # Draw backtrack path lines
+                    for curr_elem in range(len(backtrack_path_list)-1):
+                        next_elem = curr_elem + 1
+                        map_grid = cv2.line(map_grid, backtrack_path_list[curr_elem][3], backtrack_path_list[next_elem][3], (255,0,0), 1)
+
                     ax.axis('off')
+                    plt.title("Final Map Frame")
+                    plt.figure()
                     im = ax.imshow((map_grid).astype(np.uint8), animated=True, origin="lower")
+                    
                     ims.append([im])
                     
                     print("Goal Node, Node will be colored dark blue")
-
-                    
-                    found = 1
-                    goal_found = True
                     print("Last Child Node (Goal Node): \n", child_node)
                     print()
                     print("##############################################")
@@ -647,10 +611,7 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
                     print("Problem solved, now backtrack to find pathway!")
                     print()
                     print("______________________________________________")
-                    print()    
-
-                    print("FRAMES: ", len(ims))
-
+                    print()       
                     
                     return visited_queue, goal_found, fig, ims
                 
@@ -706,6 +667,9 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
                     child_c2c_val_stored = round(child_c2c_val_stored,1)
 
                     if (explored == False and is_in_open == False and is_node_obstacle == False):
+                        
+                        node_idx = node_idx + 1 
+                        
                         #print("Child not yet visited/explored, open_queue appended")
                         child_c2c_val_updated =  parent_c2c_val_stored + cost_to_move
                         
@@ -719,7 +683,7 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
                         #print("Node will be colored blue")
                         case_type = 1
 
-                        node_idx = node_idx + 1 
+                        # node_idx = node_idx + 1 
 
                     else: # Just update C2C and parent 
                         
@@ -733,7 +697,7 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
                             if child_new_c2c_val < child_c2c_val_stored:
                                 child_c2c_val_updated = child_new_c2c_val
                                 c2c_matrix[child_node_y_valid][child_node_x_valid] = child_c2c_val_updated
-                                update_child_parent(open_queue, node_idx, curr_parent_idx)
+                                update_child_parent(open_queue, node_idx, curr_parent_idx, child_c2c_val_updated)
                                 
                             
                             # print("Node in open, but not explored, will be colored blue") 
@@ -742,11 +706,11 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
             # else:
             #     print("Move not valid.")
                 
-            plot_fig = False
-            #print_function(i, valid_move, is_node_obstacle, case_type, plot_fig, map_grid)
+            plot_fig = True
+            
+            # print_function(i, valid_move, is_node_obstacle, case_type, plot_fig, map_grid)
                 
-            #print("is_node_obstacle: ", is_node_obstacle)
-                            
+            # print("is_node_obstacle: ", is_node_obstacle)
 
             ##################################################################################
             # Verification Statements
@@ -761,17 +725,12 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
 
             i = i + 1
             case_type = 0
+            
             # if i != 9:
             #     print()
 
             # print("#################################################################")
             # print()
-                
-        # visited_queue.append((curr_node[0], curr_node[1], curr_node[2], curr_node[3]))
-        # map_grid[curr_node[3][0], curr_node[3][1]] = (255,255,0)
-        # ax.axis('off')
-        # im = ax.imshow((map_grid).astype(np.uint8), animated=True, origin="lower")
-        # ims.append([im])
 
     # End of outter while loop    
     print("Goal Found Boolean: ", goal_found)
@@ -786,7 +745,7 @@ def dijkstra_approach_alg(obstacle_matrix, c2c_matrix, initial_node_coord, goal_
     
 # Function that prints results of eight_puzzle_problem function and times BFS and Traceback operations
 def main(): 
-     
+
     map_grid=[]
     map_grid, map_height, map_width = create_map_grid()
     c2c_matrix = initialize_c2c_matrix(map_grid, map_height, map_width)
@@ -808,7 +767,8 @@ def main():
     plt.title('Initial Map Grid')
     plt.imshow(map_grid.astype(np.uint8), origin="lower")
     plt.show()
-
+    
+    ###########################################################################################################
 
     x_initial, y_initial = eval(input("Enter start node's (x,y) coordinates seperated by comma. Ex: 1,2 "))
     print("Start node x-coordinate:", x_initial)
@@ -837,6 +797,8 @@ def main():
     initial_node_coord = (x_initial, y_initial)
     goal_node_coord = (x_goal, y_goal)
     
+    ###########################################################################################################
+    
     # Using different ways to compute time algorithm takes to solve problem
     start1 = time.time()
     start2 = datetime.now()
@@ -847,10 +809,11 @@ def main():
     end2 = datetime.now()
     
     print("Was goal found ? : ", goal_found)
+    print()
         
     #################################################################################################
     # FUNCTION TO GENERATE NODE PATHWAY FROM INITIAL TO GOAL NODE
-#     backtrack_node_path_arry = generate_path(node_info, goal_node_idx)
+    # backtrack_node_path_arry = generate_path(node_info, goal_node_idx)
     
     #################################################################################################
     
@@ -858,16 +821,12 @@ def main():
     # https://stackoverflow.com/questions/27779677/how-to-format-elapsed-time-from-seconds-to-hours-minutes
     # -seconds-and-milliseco
     
-    # Method 1 
-    # time_solved = round(end1 - start1, 4) # number of seconds passed since epoch (point where time begins)
-    # print("- 8 Puzzle Problem solved in seconds (Method 1): ", time_solved)
-    
-    # Method 2
+    # Method 1
     hrs, remain = divmod(end1 - start1, 3600)
     mins, secs = divmod(remain, 60)
     print("- 8 Puzzle Problem solved in (hours:min:sec:milliseconds) (Method 1): {:0>2}:{:0>2}:{:05.2f}".format(int(hrs),int(mins),secs))
     
-    # Method 3
+    # Method 2
     runtime=end2-start2
     print("- 8 Puzzle Problem solved in (hours:min:sec:milliseconds) (Method 2): " + str(runtime))
     print()
@@ -875,69 +834,27 @@ def main():
     print("Start node x-coordinate:", x_initial)
     print("Start node y-coordinate:",y_initial)
     print()
-
-    
     print("Goal node x-coordinate:",x_goal)
     print("Goal node y-coordinate:",y_goal)
     print()
     
-    #################################################################################################
-    
-#    generate_path(visited_queue)
-    #################################################################################################
-    
-    #plt.figure()
-    #plt.imshow(map_grid.astype(np.uint8), origin="lower")
-    #plt.show()
-    
-    
-    # import cv2
-    
-    # # Window name in which image is displayed
-    # window_name = 'image'
-      
-    # # Using cv2.imshow() method
-    # # Displaying the image
-    # cv2.imshow(window_name, map_grid)
-    
-    # cv2.waitKey(0)
-      
-    # closing all open windows
-    #cv2.destroyAllWindows()
+    print("Working on saving animation")
+
+    ani = animation.ArtistAnimation(fig, ims, interval=2-0, blit=True, repeat_delay=1000)
+    ani.save("movie3.gif")
+    print("Animation done")
   
-    # start3 = time.time()
-
-    # print("Working on saving animation")
-    # ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
-    # ani.save("movie.mp4")
-    # print("Animation done")
-
-
-    # end3 = time.time()
-    
-    # # Method 2
-    # hrs3, remain3 = divmod(end3 - start3, 3600)
-    # mins3, secs3 = divmod(remain3, 60)
-    # print("Extra time to quit program: (hours:min:sec:milliseconds) (Method 2): {:0>2}:{:0>2}:{:05.2f}".format(int(hrs3),int(mins3),secs3))
-    
-    #ani.save("movie.mp4")
-    # writer = animation.FFMpegWriter(fps=1, metadata=dict(artist='Me'), bitrate=1800)
-    # ani.save("movie.mp4", writer=writer)
-    # plt.show()
-    
-    #return # end of main() function
-    # start3 = time.time()
     print("DONE")
     
-    #return start3
-
+    # print(np.shape(ims[0].shape))
+    
 
 # Call main function
 main()
 
-    
+
 # if __name__ == '__main__':
 #     cProfile.run('main()')
 
 # END OF SOURCE CODE FILE
-#########################################################################################################################################
+#####################################################################################################
