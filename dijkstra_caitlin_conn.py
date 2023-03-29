@@ -7,7 +7,7 @@ Created on Tue Mar 21 16:05:08 2023
 
 """
 # Required imported libraries
-# Additional packages were installed, tried to capture requirements in readme file
+# Additional packages were installed, tried to capture requirements in readme 
 from datetime import datetime
 import matplotlib.pyplot as plt 
 import numpy as np 

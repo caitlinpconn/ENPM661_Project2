@@ -1,4 +1,4 @@
-Caitlin Conn ENPM661 Project 2 Readme.txt File
+Caitlin Conn ENPM661 Project 2 Readme.txt 
 
 This text provides the necessary instructions to run the dijkstra_caitlin_conn.py file to output the results for 
 a Dijkstra Algorithm Approach to a point robot forward search problem.
