@@ -1,86 +1,106 @@
-Caitlin Conn ENPM661 Project 2 Readme.txt
-Directory ID: 114048295
+Caitlin Conn ENPM661 Project 2 Readme.txt File
 
-This text provides the necessary instructions to run the proj1_caitlin_conn_sourcecode.py file to output the results for a Dijkstra Approach to a point robot search problem.
-################################################################################################
+This text provides the necessary instructions to run the dijkstra_caitlin_conn.py file to output the results for 
+a Dijkstra Algorithm Approach to a point robot forward search problem.
 
-Project # 2 Important Notes:
-* The node indices start from 1 (start node), not 0. The first node (start node) is assumed to have no parent, so its parent node index is 0.
-* Imported required libraries include the following and are listed in the beginning of the python script:
-import matplotlib.pyplot as plt 
-import numpy as np 
-import time
-import math
-import cv2 
-import imutils
+###############################################################################################################################
 
-from datetime import datetime
+Project #2 Important Library/Dependency Notes:
+Imported required libraries include the following and are listed in the beginning of the python script:
+  from datetime import datetime
+  import matplotlib.pyplot as plt 
+  import numpy as np 
+  import time
+  import math
+  import cv2 
+  import imutils
 
-Packages Installed:
-•	pip3 install opencv-python
-•	pip install images2gif
-•	pip install pillow
-•	pip install vidmaker
-•	pip install pygame
-•	pip install imutils
+Additional packages are required to be installed using the following commands depending on the user's version of Python:
+- pip3 install opencv-python
+- pip install images2gif
+- pip install pillow
+- pip install vidmaker
+- pip install pygame
+- pip install imutils
 
+*Please note that due to how many code versions the author made, not all library or package depedencies may be captured 
+in this Readme file. Upon code excution, the user's terminal will warn the user if they are missing any required dependencies, 
+which will result in an error when running the .py file. The dependencies must be installed for the code to run.
 
+###############################################################################################################################
 
-* Please see the submitted .txt and .odt files under the 'Test Case Results' folder in the student's .zip folder to view the outputed results (of 3 test cases) written to the nodePath.txt, Nodes.txt, and NodesInfo.txt files. Each test case has their own folder for organization purposes.
+User Example Inputs for the Submitted Video Files:
+- Case 1: Initial Node: (10,11), Goal Node: (20,30)
+- Case 2: Initial Node: (10,11), Goal Node: (150,100)
+- Case 3: Initial Node: (15,10), Goal Node: (285,115)
+- Case 4: Initial Node: (200,99), Goal Node: (200,99)
+
+Google Drive link to video submissions: https://drive.google.com/drive/folders/1Mes4zJNGkZ3JN2bK0MrI44kxn-KirrMY?usp=sharing
+- Anyone with video link should have access to the 4 video examples.
+
+Github Project Link: https://github.com/caitlinpconn/ENPM661_Project2.git
 	
-################################################################################################
+###############################################################################################################################
 
-Project # 2 Run Instructions: 
-To run the code to solve the search problem using Dijkstra's algorithm using Python, perform the following: 
+Project #2 Code Execution Instructions: 
+To run the code to solve the search problem using Dijkstra's algorithm in Python, perform the following: 
 
-If using a command line terminal, put the proj1_caitlin_conn_sourcecode.py file in the current working directory and enter the following command in the terminal to run the python program:
+If using a command line terminal, put the dijkstra_caitlin_conn.py file in the current working directory and enter the following 
+command in the terminal to run the python program using Python 3 version:
  
-	python3 ./proj1_caitlin_conn_sourcecode
+	python3 ./dijkstra_caitlin_conn
 	
-Otherwise, use an IDE to open and run the proj1_caitlin_conn_sourcecode.py file, by hitting the 'run' button.
+Otherwise, use an IDE to open and run the dijkstra_caitlin_conn.py file, by hitting the 'run' button.
 
-------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------
 
-The user should modify the following input parameters (initial node and goal node) by editing the following parameters at the bottom of the proj1_caitlin_conn_sourcecode.py file using an IDE or text editor as shown below:
+The user should enter the code input parameters (initial node and goal node) by specifying the inputs when prompted by the code 
+using an IDE or command line terminal.
 
-The below lines are listed in the python script and can be edited to test the results. The user can set the variables initial_node and goal_node to one of the 3 test cases as shown below, or uncomment variables initial_node_custom_user_case and goal_node_custom_user_case to enter their own random custom test case.
+An example of the code at the start of execution and prompt for user input is shown below. 
+The grid origin (0,0) is defined in the bottom left corner of the map.
 
-################################################################################################
+For example, user enters using keyboard 10 followed by enter and then 11 followed by enter to specify the inital node input.
+User then enters using keyboard 15 followed by enter and then 20 followed by enter to specify the goal node input.
 
-# *** Define/change input parameters that can be modified by the user to run different test cases on the code ***
-    
-# Function outputs to textfile the order of states from the initial to the goal node in column-wise order, such that:
-# For example, for state 1 4 7 2 5 8 3 6 0, the eight puzzle state  is:
-#1 2 3
-#4 5 6
-#7 8 0
-    
-# Case 1 provided 
-initial_node_case1 = [1, 2, 4, 6, 0, 3, 7, 5, 8]
-goal_node_case1 = [1, 2, 3, 4, 5, 0, 7, 8, 6]
+The code will output if a solution exists for the inputed problem and if the goal node was found.
+The code will output a video animation called 'conn_dijkstra_algorithm_video.avi'if a solution was found to the current directory and
+the code will output the time the algorithm to run takes in hours, minutes, seconds, and milliseconds using two different methods.
 
-# Case 2 provided
-initial_node_case2 = [4, 2, 3, 7, 1, 6, 8, 5, 0]
-goal_node_case2 = [1, 2, 3, 4, 5, 6, 7, 8, 0]
+An example is provided below:
 
-# Case 3 referenced in lecture slides
-initial_node_case3 = [2, 1, 7, 8, 6, 0, 3, 4, 5]
-goal_node_case3 = [1, 8, 7, 2, 0, 6, 3, 4, 5]
+###############################################################################################################################
 
-# USER CAN UNCOMMENT THE BELOW TWO LINES TO ENTER CUSTOM TEST CASES 
-# IF DONE SO, ASSIGN BELOW initial_node = initial_node_custom_user_case
-# IF DONE SO, ASSIGN BELOW goal_node = goal_node_custom_user_case
+Enter start node's x coordinate. x coordinate can range from 0 to 299: 10
 
-# initial_node_custom_user_case = [...] 
-# goal_node_custom_user_case = [...]
+Enter start node's y coordinate. y coordinate can range from 0 to 124: 11
+Start node x-coordinate: 10
+Start node y-coordinate: 11
 
-# MODIFY THE BELOW TWO LINES TO CHANGE INPUT PARAMETERS TO CODE
-initial_node = initial_node_case3
-goal_node = goal_node_case3
 
-main(initial_node, goal_node)
+Enter goal node's x coordinate. x coordinate can range from 0 to 299: 15
 
-# END OF SOURCE CODE FILE
+Enter goal node's y coordinate. y coordinate can range from 0 to 124: 20
+Goal node x-coordinate: 15
+Goal node y-coordinate: 20
 
-################################################################################################
+_______________________________________________________________________________________
 
+Last Child Node (Goal Node): 
+ ((15, 20), (11.0, 238, 202, (14, 19)))
+
+Problem solved, now backtrack to find optimal path!
+
+_______________________________________________________________________________________
+
+Was goal found ? ->  True
+
+- Problem solved in (hours:min:sec:milliseconds) (Method 1): 00:00:00.02
+- Problem solved in (hours:min:sec:milliseconds) (Method 2): 0:00:00.016286
+
+Start node coordinate input: (10, 11)
+Goal node coordinate input: (15, 20)
+
+Code Script Complete.
+
+###############################################################################################################################
