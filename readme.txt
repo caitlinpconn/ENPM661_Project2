@@ -7,11 +7,25 @@ This text provides the necessary instructions to run the proj1_caitlin_conn_sour
 Project # 2 Important Notes:
 * The node indices start from 1 (start node), not 0. The first node (start node) is assumed to have no parent, so its parent node index is 0.
 * Imported required libraries include the following and are listed in the beginning of the python script:
-	from collections import deque
-	from datetime import datetime
-	import numpy as np
-	import time
-	
+import matplotlib.pyplot as plt 
+import numpy as np 
+import time
+import math
+import cv2 
+import imutils
+
+from datetime import datetime
+
+Packages Installed:
+•	pip3 install opencv-python
+•	pip install images2gif
+•	pip install pillow
+•	pip install vidmaker
+•	pip install pygame
+•	pip install imutils
+
+
+
 * Please see the submitted .txt and .odt files under the 'Test Case Results' folder in the student's .zip folder to view the outputed results (of 3 test cases) written to the nodePath.txt, Nodes.txt, and NodesInfo.txt files. Each test case has their own folder for organization purposes.
 	
 ################################################################################################
